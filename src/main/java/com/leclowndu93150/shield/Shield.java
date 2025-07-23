@@ -3,6 +3,8 @@ package com.leclowndu93150.shield;
 import com.leclowndu93150.shield.entity.ThrownShield;
 import com.leclowndu93150.shield.item.CaptainAmericaShieldItem;
 import com.leclowndu93150.shield.renderer.ThrownShieldRenderer;
+import com.leclowndu93150.shield.network.PacketHandler;
+import com.leclowndu93150.shield.client.KeyBindings;
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.item.ItemProperties;
@@ -20,8 +22,8 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import org.slf4j.Logger;
-import software.bernie.geckolib3.GeckoLib;
 
 @Mod(Shield.MODID)
 public class Shield {
@@ -47,10 +49,9 @@ public class Shield {
     public Shield() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        GeckoLib.initialize();
-
         modEventBus.addListener(this::commonSetup);
         modEventBus.addListener(this::clientSetup);
+        modEventBus.addListener(this::registerKeys);
 
         ITEMS.register(modEventBus);
         ENTITY_TYPES.register(modEventBus);
@@ -59,14 +60,23 @@ public class Shield {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> {
+            PacketHandler.register();
+        });
         LOGGER.info("Captain America Shield mod initialized!");
     }
 
     private void clientSetup(final FMLClientSetupEvent event) {
         EntityRenderers.register(THROWN_SHIELD.get(), ThrownShieldRenderer::new);
 
-        ItemProperties.register(CAPTAIN_AMERICA_SHIELD.get(), new ResourceLocation("throwing"), (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0F : 0.0F);
-
-        ItemProperties.register(CAPTAIN_AMERICA_SHIELD.get(), new ResourceLocation("blocking"), (stack, level, entity, seed) -> entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0F : 0.0F);
+        ItemProperties.register(CAPTAIN_AMERICA_SHIELD.get(),
+                new ResourceLocation("blocking"),
+                (stack, level, entity, seed) ->
+                        entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0F : 0.0F
+        );
+    }
+    
+    private void registerKeys(RegisterKeyMappingsEvent event) {
+        KeyBindings.register(event);
     }
 }

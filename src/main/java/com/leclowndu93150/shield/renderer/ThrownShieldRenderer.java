@@ -19,7 +19,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class ThrownShieldRenderer extends EntityRenderer<ThrownShield> {
 
-    private static final ResourceLocation TEXTURE = new ResourceLocation(Shield.MODID, "textures/item/cashield.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(Shield.MODID, "textures/item/captain_america_shield.png");
     private final ItemRenderer itemRenderer;
 
     public ThrownShieldRenderer(EntityRendererProvider.Context context) {
@@ -31,22 +31,18 @@ public class ThrownShieldRenderer extends EntityRenderer<ThrownShield> {
     public void render(ThrownShield entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         poseStack.pushPose();
 
-        // Calculate rotation based on entity motion
         float yRot = Mth.lerp(partialTicks, entity.yRotO, entity.getYRot());
         float xRot = Mth.lerp(partialTicks, entity.xRotO, entity.getXRot());
 
-        // Apply rotations
         poseStack.mulPose(Vector3f.YP.rotationDegrees(yRot - 90.0F));
         poseStack.mulPose(Vector3f.ZP.rotationDegrees(xRot));
 
-        // Add spinning animation
+        poseStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
         float spin = (entity.tickCount + partialTicks) * 20.0F;
-        poseStack.mulPose(Vector3f.XP.rotationDegrees(spin));
+        poseStack.mulPose(Vector3f.ZP.rotationDegrees(spin));
 
-        // Scale
         poseStack.scale(1.5F, 1.5F, 1.5F);
 
-        // Render the shield
         ItemStack shieldStack = new ItemStack(Shield.CAPTAIN_AMERICA_SHIELD.get());
         this.itemRenderer.renderStatic(shieldStack, ItemTransforms.TransformType.GROUND,
                 packedLight, OverlayTexture.NO_OVERLAY, poseStack, buffer, (int)entity.getId());
